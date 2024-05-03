@@ -1,0 +1,79 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanical Flower Petal Project Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-blue-800 text-white flex flex-col">
+            <div class="px-4 py-6 flex items-center">
+                <!-- <img src="flower_logo.png" alt="Company logo" class="h-12">
+                <span class="text-lg font-bold">Mechanical Flower Petal</span> -->
+                 <!-- Logo placeholder -->
+                 <img src="inverted_flower.png" alt="Logo representing Project using Flower Petal" class="w-12 h-12 mr-3">
+                 <span class="text-lg font-bold">Project Dashboard</span>
+            </div>
+            <!-- Home is now the current page -->
+            <div class="flex flex-col py-4">
+                <!-- <a href="#" class="flex items-center px-4 py-2 mt-2 text-sm font-semibold bg-blue-700"> -->
+                <a href="index.html" class="flex items-center px-4 py-2 mt-2 text-sm font-semibold hover:bg-blue-700">
+                    <i class="fas fa-home mr-3"></i>Home
+                </a>
+                <a href="#" class="flex items-center px-4 py-2 mt-2 text-sm font-semibold hover:bg-blue-700">
+                    <i class="fas fa-wind mr-3"></i>Air Quality
+                </a>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="px-6 py-4 bg-white shadow-md flex justify-between items-center">
+                <h1 class="text-xl font-semibold text-gray-700"><i class="fas fa-wind mr-3"></i>Air Quality Information</h1>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6 py-4 flex-1 overflow-y-auto">
+                <!-- Understanding Air Quality Index (AQI) -->
+                <h2 class="text-2xl font-semibold mb-6">Understanding Air Quality Index (AQI)</h2>
+                <div class="bg-white p-6 rounded-lg shadow mb-4">
+                    <p class="mb-4">
+                        The Air Quality Index (AQI) is a standardized indicator used to communicate how polluted the air currently is or how polluted it is forecast to become. It measures the concentration of different air pollutants, including particulate matter (PM2.5 and PM10), carbon monoxide (CO), sulfur dioxide (SO2), nitrogen dioxide (NO2), and ground-level ozone (O3).
+                    </p>
+                    <p class="mb-4">
+                        AQI is calculated using readings from air quality sensors that measure the concentration of these pollutants in the air. Each pollutant has a different weight in the AQI calculation, reflecting its potential health impacts. An AQI value of 0 to 50 represents good air quality with little potential to affect public health, while values over 300 represent hazardous air quality that poses serious health risks.
+                    </p>
+                </div>
+
+                <!-- How to Improve the AQI -->
+                <h2 class="text-2xl font-semibold mb-6">How to Improve the AQI</h2>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="mb-4">
+                        Improving the AQI involves reducing the concentration of pollutants in the air. This can be achieved through a combination of personal actions and community efforts. On a personal level, reducing vehicle use, conserving energy at home, and avoiding burning leaves or trash can help lower emissions.
+                    </p>
+                    <p class="mb-4">
+                        On a broader scale, supporting policies and initiatives that promote clean energy, improve public transportation, and enforce industrial emissions standards can lead to significant improvements in air quality. Monitoring the AQI can provide valuable insights into the effectiveness of these measures and help guide further actions to create a healthier environment.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-white shadow-inner">
+                <div class="text-center text-sm text-gray-600">
+                    © Copyrights Arcux-White 2024. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
