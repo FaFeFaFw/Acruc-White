@@ -6,7 +6,7 @@ This code repository contains the UI code for controlling a mechanical flower pe
 
 ## UI Preview
 
-![UI Preview](https://i.imgur.com/JxgNDJ5.gif) 
+![UI Preview](https://i.imgur.com/JxgNDJ5g.jpg) 
 
 Here is a preview of the UI in action:
 
