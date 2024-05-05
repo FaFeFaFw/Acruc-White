@@ -81,7 +81,7 @@ const SensorReadings = () => {
       },
     },
     legend: {
-      display: false,
+      display: true,
     },
   };
 

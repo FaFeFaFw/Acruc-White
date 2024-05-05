@@ -10,8 +10,8 @@ function MainHeader() {
           console.log('Refresh button clicked');
           // Add functionality to refresh the dashboard data
         }}>
-          <i className="fas fa-sync-alt"></i>
-        </button>
+            <i className="fas fa-sync-alt"></i>
+          </button>
       </div>
     </div>
   );
