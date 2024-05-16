@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Box } from '@mui/material';
-import axios from 'axios';
 import Chart from 'chart.js/auto';
+import useSensorData from '../hooks/useSensorData';
 
 const AirQualityGraph = () => {
-  const [aqiData, setAqiData] = useState({
+  const { sensorData, isLoading, error } = useSensorData(100); // Fetch data every 0.1 second
+  const [co2Data, setCo2Data] = useState({
     labels: [],
     datasets: [
       {
-        label: 'AQI',
+        label: 'CO2',
         data: [],
         fill: false,
         backgroundColor: 'rgb(75, 192, 192)',
@@ -19,43 +20,41 @@ const AirQualityGraph = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log('Attempting to fetch AQI data from /aqi_data...');
-        const response = await axios.get('http://localhost:8000/aqi_data');
-        const fetchedData = response.data;
-        const updatedLabels = fetchedData.historicalData.map(data => data.timestamp.split('T')[0]);
-        const updatedData = fetchedData.historicalData.map(data => data.AQI);
-        setAqiData(prevState => ({
-          ...prevState,
-          labels: updatedLabels,
+    if (!isLoading && !error && sensorData.CO2) {
+      const currentTimestamp = new Date().toLocaleTimeString(); // Get current time in HH:MM:SS format
+      const co2Value = sensorData.CO2;
+
+      setCo2Data(prevState => {
+        // Log the current state for debugging
+        console.log('Updating chart data', {
+          labels: [...prevState.labels, currentTimestamp].slice(-50),
+          data: [...prevState.datasets[0].data, co2Value].slice(-50),
+        });
+
+        return {
+          labels: [...prevState.labels, currentTimestamp].slice(-50), // Keep the latest 50 entries
           datasets: [
             {
               ...prevState.datasets[0],
-              data: updatedData,
+              data: [...prevState.datasets[0].data, co2Value].slice(-50), // Keep the latest 50 entries
             },
           ],
-        }));
-        console.log('AQI data fetched successfully from /aqi_data.');
-      } catch (error) {
-        console.error('Failed to fetch AQI data from /aqi_data:', error);
-        console.error(error.response ? error.response.data : error.message);
-      }
-    };
+        };
+      });
+    }
+  }, [sensorData, isLoading, error]);
 
-    const intervalId = setInterval(() => {
-      fetchData();
-    }, 5000); // Fetch new data every 5 seconds
+  if (isLoading) {
+    return <div>Loading CO2 data...</div>;
+  }
 
-    return () => {
-      clearInterval(intervalId); // Clean up the interval on component unmount
-      console.log('Cleaned up interval for AQI data fetching.');
-    };
-  }, []);
+  if (error) {
+    return <div style={{ color: 'red' }}>{error}</div>;
+  }
 
   return (
     <Box sx={{ height: 400 }}>
-      <Line data={aqiData} />
+      <Line data={co2Data} />
     </Box>
   );
 };

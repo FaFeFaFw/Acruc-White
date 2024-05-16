@@ -1,112 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Box, Typography } from '@mui/material';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import React, { useEffect, useState, useRef } from 'react';
+import { Line } from 'react-chartjs-2';
+import { Box } from '@mui/material';
+import Chart from 'chart.js/auto';
+import useSensorData from '../hooks/useSensorData';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-const SensorReadings = () => {
-  const [sensorData, setSensorData] = useState({
-    CO2: 0,
-    Temperature: 0,
-    TVOC: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get('http://localhost:8000/sensor_data');
-        console.log('Fetching sensor data from /sensor_data');
-        setSensorData({
-          CO2: calculateAQI_CO2(response.data.CO2),
-          Temperature: calculateAQI_Temperature(response.data.Temperature),
-          TVOC: calculateAQI_TVOC(response.data.TVOC),
-        });
-        setIsLoading(false);
-        setError(null);
-      } catch (error) {
-        console.error('Failed to fetch sensor data from /sensor_data:', error.response ? error.response.data : error.message);
-        setError('Failed to fetch sensor data');
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-    const intervalId = setInterval(fetchData, 5000); // fetch data every 5 seconds
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const calculateAQI_CO2 = (co2) => {
-    if (co2 <= 800) return 50;
-    if (co2 <= 1200) return 100;
-    if (co2 <= 1600) return 150;
-    if (co2 <= 2000) return 200;
-    return 250;
-  };
-
-  const calculateAQI_Temperature = (temp) => {
-    if (temp < 18 || temp > 26) return 150;
-    return 50;
-  };
-
-  const calculateAQI_TVOC = (tvoc) => {
-    if (tvoc <= 500) return 50;
-    if (tvoc <= 1000) return 100;
-    if (tvoc <= 1500) return 150;
-    if (tvoc <= 2000) return 200;
-    return 250;
-  };
-
-  const chartData = {
-    labels: ['CO2', 'Temperature', 'TVOC'],
+const SensorReading = () => {
+  const { sensorData, isLoading, error } = useSensorData(); // Fetch data every 0.1 second
+  const [tvocData, setTvocData] = useState({
+    labels: [],
     datasets: [
       {
-        label: 'Sensor AQI',
-        data: [sensorData.CO2, sensorData.Temperature, sensorData.TVOC],
-        backgroundColor: ['#4caf50', '#f44336', '#2196f3'],
+        label: 'TVOC',
+        data: [],
+        fill: false,
+        backgroundColor: 'rgb(75, 192, 192)',
+        borderColor: 'rgba(75, 192, 192, 0.2)',
+        borderWidth: 2,
       },
     ],
-  };
+  });
 
-  const chartOptions = {
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    if (!isLoading && !error && sensorData.TVOC) {
+      const currentTimestamp = new Date().toLocaleTimeString(); // Get current time in HH:MM:SS format
+      const tvocValue = sensorData.TVOC;
+
+      setTvocData(prevState => {
+        const newLabels = [...prevState.labels, currentTimestamp].slice(-50); // Keep the latest 50 entries
+        const newData = [...prevState.datasets[0].data, tvocValue].slice(-50); // Keep the latest 50 entries
+
+        if (chartRef.current) {
+          chartRef.current.data.labels = newLabels;
+          chartRef.current.data.datasets[0].data = newData;
+
+          // Adjust y-axis limits based on TVOC value
+          const minY = Math.min(...newData, 0);
+          const maxY = Math.max(...newData, 30);
+          chartRef.current.options.scales.y.min = minY;
+          chartRef.current.options.scales.y.max = maxY;
+
+          chartRef.current.update();
+        }
+
+        return {
+          labels: newLabels,
+          datasets: [
+            {
+              ...prevState.datasets[0],
+              data: newData,
+            },
+          ],
+        };
+      });
+    }
+  }, [sensorData, isLoading, error]);
+
+  const options = {
     scales: {
       y: {
-        beginAtZero: true,
-        max: 300,
+        title: {
+          display: true,
+          text: 'TVOC (ppb)',
+        },
+        min: 0,
+        max: 30,
       },
-    },
-    legend: {
-      display: true,
+      x: {
+        title: {
+          display: true,
+          text: 'Time',
+        },
+      },
     },
   };
 
-  if (error) {
-    return (
-      <Box>
-        <Typography variant="h6" color="error">Error: {error}</Typography>
-      </Box>
-    );
+  if (isLoading) {
+    return <div>Loading TVOC data...</div>;
   }
 
-  if (isLoading) {
-    return (
-      <Box>
-        <Typography variant="h6">Loading sensor data...</Typography>
-      </Box>
-    );
+  if (error) {
+    return <div style={{ color: 'red' }}>{error}</div>;
   }
 
   return (
-    <Box>
-      <Typography variant="h6">Sensor Readings</Typography>
-      <Bar data={chartData} options={chartOptions} />
+    <Box sx={{ height: 400 }}>
+      <Line ref={chartRef} data={tvocData} options={options} />
     </Box>
   );
 };
 
-export default SensorReadings;
+export default SensorReading;

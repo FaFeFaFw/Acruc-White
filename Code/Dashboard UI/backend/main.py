@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 # Logging module for logging messages
 import logging
+import time
 
 # Start importing MQTT client
 # from mqtt_client import start_mqtt_client
@@ -32,7 +33,7 @@ app.add_middleware(
 
 class SensorData(BaseModel):
     CO2: int
-    Temperature: float
+    Temperature: int
     TVOC: int
 
 class AQIData(BaseModel):
@@ -47,11 +48,18 @@ class Metrics(BaseModel):
     avgTVOC: int
     flowerPetal: bool
 
+
+sensor_data = {
+    "CO2": 0,
+    "Temperature": 0,
+    "TVOC": 0
+}
+
 # Mock data for demonstration
 mock_sensor_data = {
-    "CO2": 2000,
+    "CO2": 400,
     "Temperature": 22.0,
-    "TVOC": 150
+    "TVOC": 1
 }
 
 mock_aqi_data = {
@@ -88,11 +96,21 @@ async def lifespan(app: FastAPI):
 
 # Define the API endpoints
 
+
+@app.post("/update_sensor_data")
+async def update_sensor_data(data: SensorData):
+    global sensor_data
+    sensor_data["CO2"] = data.CO2
+    sensor_data["Temperature"] = data.Temperature
+    sensor_data["TVOC"] = data.TVOC
+    return {"status": "success"}
+
 @app.get("/sensor_data", response_model=SensorData)
 async def get_sensor_data():
     try:
         logger.info("Fetching sensor data")
-        return mock_sensor_data
+        global sensor_data
+        return sensor_data
     except Exception as e:
         logger.error(f"Error fetching sensor data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Error fetching sensor data")

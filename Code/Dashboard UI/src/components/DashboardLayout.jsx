@@ -49,8 +49,8 @@ function DashboardLayout() {
         <div className="flex-1 overflow-y-auto p-6">
           <h2 className="text-2xl font-semibold">Dashboard</h2>
           {/* Top graphs/charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white p-6 rounded-lg shadow">
               <AirQualityGraph />
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
@@ -74,8 +74,8 @@ function DashboardLayout() {
               </div>
             </div>
             {/* Flower Control */}
-            <FlowerController/>
-            
+            <FlowerController />
+
           </div>
         </div>
 
