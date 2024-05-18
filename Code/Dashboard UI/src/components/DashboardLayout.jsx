@@ -7,14 +7,12 @@ import SensorReadings from './SensorReadings';
 import OtherMetrics from './OtherMetrics';
 import FlowerController from './FlowerController';
 import Footer from './Footer';
-
+import AQI from './AQI'; // Import the new AQI graph component
 
 function DashboardLayout() {
   const [toggleCO2, setToggleCO2] = useState(true);
   const [toggleTemp, setToggleTemp] = useState(true);
   const [toggleTVOC, setToggleTVOC] = useState(true);
-  // Add flower control state
-  // const [toggleAuto, setToggleAuto] = useState(true);
 
   useEffect(() => {
     console.log('DashboardLayout mounted or toggle states changed');
@@ -32,9 +30,6 @@ function DashboardLayout() {
       case 'TVOC':
         setToggleTVOC(!toggleTVOC);
         break;
-      // case 'Flower':
-      //   setToggleAuto(!toggleAuto);
-      //   break;
       default:
         console.error('Unknown sensor type');
     }
@@ -49,12 +44,15 @@ function DashboardLayout() {
         <div className="flex-1 overflow-y-auto p-6">
           <h2 className="text-2xl font-semibold">Dashboard</h2>
           {/* Top graphs/charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <AirQualityGraph />
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
               <SensorReadings />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <AQI />
             </div>
           </div>
           {/* Bottom stats and controls */}
@@ -75,7 +73,6 @@ function DashboardLayout() {
             </div>
             {/* Flower Control */}
             <FlowerController />
-
           </div>
         </div>
 

@@ -35,6 +35,7 @@ class SensorData(BaseModel):
     CO2: int
     Temperature: int
     TVOC: int
+    timestamp: float
 
 class AQIData(BaseModel):
     AQI: int
@@ -52,7 +53,8 @@ class Metrics(BaseModel):
 sensor_data = {
     "CO2": 0,
     "Temperature": 0,
-    "TVOC": 0
+    "TVOC": 0,
+    "timestamp": time.time()
 }
 
 # Mock data for demonstration
@@ -103,6 +105,7 @@ async def update_sensor_data(data: SensorData):
     sensor_data["CO2"] = data.CO2
     sensor_data["Temperature"] = data.Temperature
     sensor_data["TVOC"] = data.TVOC
+    sensor_data["timestamp"] = data.timestamp
     return {"status": "success"}
 
 @app.get("/sensor_data", response_model=SensorData)
