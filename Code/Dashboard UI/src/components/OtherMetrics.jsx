@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import useSensorData from '../hooks/useSensorData';
 
-function OtherMetrics() {
+function OtherMetrics({ co2Percentage, tvocPercentage }) {
   const { sensorData, isLoading: sensorLoading, error: sensorError } = useSensorData();
   const [timeDifference, setTimeDifference] = useState('');
+  const [aqi, setAqi] = useState(0);
+
+  const calculateAQI = (co2, tvoc) => {
+    return (co2 / 2000) * (co2Percentage / 100) + (tvoc / 200) * (tvocPercentage / 100);
+  };
 
   useEffect(() => {
     if (sensorData.timestamp) {
@@ -12,14 +17,14 @@ function OtherMetrics() {
       const sensorTime = new Date(sensorData.timestamp).getTime();
       const diffInMs = currentTime - sensorTime;
 
-      // // Convert the difference to a readable format (e.g., seconds, minutes)
-      // const diffInSeconds = Math.floor(diffInMs / 1000);
-      // const diffInMinutes = Math.floor(diffInSeconds / 60);
-      // const displayDiff = diffInMinutes > 0 ? `${diffInMinutes} min ago` : `${diffInSeconds} sec ago`;
-
       setTimeDifference(`${diffInMs} ms`);
     }
-  }, [sensorData.timestamp]);
+
+    if (sensorData.CO2 !== undefined && sensorData.TVOC !== undefined) {
+      const newAqi = calculateAQI(sensorData.CO2, sensorData.TVOC);
+      setAqi(newAqi.toFixed(2)); // Format the AQI value to 2 decimal places
+    }
+  }, [sensorData, co2Percentage, tvocPercentage]);
 
   if (sensorLoading) {
     return <div>Loading metrics...</div>;
@@ -34,10 +39,11 @@ function OtherMetrics() {
       <h3 className="text-lg font-semibold mb-4">Other metrics</h3>
 
       <div className="space-y-2">
+        <MetricRow label="AQI" value={aqi} />
         <MetricRow label="CO2" value={sensorData.CO2} />
-        <MetricRow label="Temperature" value={sensorData.Temperature} />
         <MetricRow label="TVOC" value={sensorData.TVOC} />
         <MetricRow label="Lag" value={timeDifference} />
+        <MetricRow label="Temperature" value={sensorData.Temperature} />
       </div>
     </div>
   );

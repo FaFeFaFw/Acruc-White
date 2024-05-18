@@ -18,7 +18,7 @@ const AirQualityGraph = () => {
         segment: {
           borderColor: (ctx) => {
             const value = ctx.p0.parsed.y;
-            return value > 2500 ? 'red' : value > 1000 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
+            return value > 4000 ? 'red' : value > 1000 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
           },
         },
       },
@@ -78,7 +78,7 @@ const AirQualityGraph = () => {
           scales: {
             y: {
               min: 400,
-              max: 4000,
+              max: 7000,
               ticks: {
                 callback: function (value) {
                   return value; // Displaying values directly

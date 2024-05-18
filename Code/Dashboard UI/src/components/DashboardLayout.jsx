@@ -7,33 +7,15 @@ import SensorReadings from './SensorReadings';
 import OtherMetrics from './OtherMetrics';
 import FlowerController from './FlowerController';
 import Footer from './Footer';
-import AQI from './AQI'; // Import the new AQI graph component
+import AQIGraph from './AQIGraph'; // Import the new AQI graph component
 
 function DashboardLayout() {
-  const [toggleCO2, setToggleCO2] = useState(true);
-  const [toggleTemp, setToggleTemp] = useState(true);
-  const [toggleTVOC, setToggleTVOC] = useState(true);
+  const [co2Percentage, setCO2Percentage] = useState(50);
+  const [tvocPercentage, setTVOCPercentage] = useState(50);
 
   useEffect(() => {
-    console.log('DashboardLayout mounted or toggle states changed');
-  }, [toggleCO2, toggleTemp, toggleTVOC]);
-
-  const handleToggle = (sensorType) => {
-    console.log(`Toggling ${sensorType}`);
-    switch (sensorType) {
-      case 'CO2':
-        setToggleCO2(!toggleCO2);
-        break;
-      case 'Temp':
-        setToggleTemp(!toggleTemp);
-        break;
-      case 'TVOC':
-        setToggleTVOC(!toggleTVOC);
-        break;
-      default:
-        console.error('Unknown sensor type');
-    }
-  };
+    setTVOCPercentage(100 - co2Percentage);
+  }, [co2Percentage]);
 
   return (
     <div className="flex h-screen">
@@ -51,23 +33,35 @@ function DashboardLayout() {
               <SensorReadings />
             </div>
             <div className="bg-white p-6 rounded-lg shadow">
-              <AQI />
+              <AQIGraph co2Percentage={co2Percentage} tvocPercentage={tvocPercentage} />
             </div>
           </div>
           {/* Bottom stats and controls */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Other metrics */}
-            <OtherMetrics />
+            <OtherMetrics co2Percentage={co2Percentage} tvocPercentage={tvocPercentage} />
             {/* Sensor Control */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">Sensors Control</h3>
-              <div className="flex space-x-4 items-center">
-                <input type="checkbox" name="toggleCO2" id="toggleCO2" checked={toggleCO2} onChange={() => handleToggle('CO2')} className="toggle-checkbox" />
-                <label htmlFor="toggleCO2" className="text-sm text-gray-600">Enable CO2</label>
-                <input type="checkbox" name="toggleTemp" id="toggleTemp" checked={toggleTemp} onChange={() => handleToggle('Temp')} className="toggle-checkbox" />
-                <label htmlFor="toggleTemp" className="text-sm text-gray-600">Enable Temp.</label>
-                <input type="checkbox" name="toggleTVOC" id="toggleTVOC" checked={toggleTVOC} onChange={() => handleToggle('TVOC')} className="toggle-checkbox" />
-                <label htmlFor="toggleTVOC" className="text-sm text-gray-600">Enable TVOC</label>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <label htmlFor="co2Percentage" className="text-sm text-gray-600">CO2 Percentage:</label>
+                  <input
+                    type="range"
+                    id="co2Percentage"
+                    name="co2Percentage"
+                    min="0"
+                    max="100"
+                    value={co2Percentage}
+                    onChange={(e) => setCO2Percentage(e.target.value)}
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-bold">{co2Percentage}%</span>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <label htmlFor="tvocPercentage" className="text-sm text-gray-600">TVOC Percentage:</label>
+                  <span className="text-sm font-bold">{tvocPercentage}%</span>
+                </div>
               </div>
             </div>
             {/* Flower Control */}
