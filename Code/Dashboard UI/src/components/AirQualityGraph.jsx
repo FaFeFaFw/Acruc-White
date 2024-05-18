@@ -15,6 +15,12 @@ const AirQualityGraph = () => {
         fill: false,
         backgroundColor: 'rgb(75, 192, 192)',
         borderColor: 'rgba(75, 192, 192, 0.2)',
+        segment: {
+          borderColor: (ctx) => {
+            const value = ctx.p0.parsed.y;
+            return value > 2500 ? 'red' : value > 1000 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
+          },
+        },
       },
     ],
   });
@@ -23,33 +29,30 @@ const AirQualityGraph = () => {
   useEffect(() => {
     const currentTime = Date.now();
     const dataTimestamp = sensorData.timestamp;
-    const diff = currentTime - dataTimestamp;
 
     if (dataTimestamp) {
-      setSensorTimestamp(new Date(dataTimestamp).toLocaleString()); // Convert to human-readable format
+      setSensorTimestamp(new Date(dataTimestamp).toLocaleString('en-US')); // Convert to human-readable format
     }
 
-    // setTimeDifference(dataTimestamp);
-
     if (!isLoading && !error && sensorData.CO2) {
-      const currentTimestamp = new Date().toLocaleTimeString(); // Get current time in HH:MM:SS format
+      const currentTimestamp = new Date().toLocaleTimeString('en-US'); // Get current time in HH:MM:SS format
       const co2Value = sensorData.CO2;
 
-      setCo2Data(prevState => {
+      setCo2Data((prevState) => {
         // Log the current state for debugging
         console.log('Updating chart data', {
-          labels: [...prevState.labels, currentTimestamp].slice(-10),
-          data: [...prevState.datasets[0].data, co2Value].slice(-10),
+          labels: [...prevState.labels, currentTimestamp].slice(-50),
+          data: [...prevState.datasets[0].data, co2Value].slice(-50),
         });
 
+        const newDataset = {
+          ...prevState.datasets[0],
+          data: [...prevState.datasets[0].data, co2Value].slice(-50),
+        };
+
         return {
-          labels: [...prevState.labels, currentTimestamp].slice(-10), // Keep the latest 10 entries
-          datasets: [
-            {
-              ...prevState.datasets[0],
-              data: [...prevState.datasets[0].data, co2Value].slice(-10), // Keep the latest 10 entries
-            },
-          ],
+          labels: [...prevState.labels, currentTimestamp].slice(-50), // Keep the latest 50 entries
+          datasets: [newDataset],
         };
       });
     } else {
@@ -67,10 +70,27 @@ const AirQualityGraph = () => {
 
   return (
     <Box sx={{ height: 500, width: '100%' }}>
-      <Line data={co2Data} options={{ responsive: true, maintainAspectRatio: false }} />
-      <Typography variant="body1" align="center" marginTop={2}>
-        TSensor Timestamp: {sensorTimestamp}
-      </Typography>
+      <Line
+        data={co2Data}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              min: 400,
+              max: 4000,
+              ticks: {
+                callback: function (value) {
+                  return value; // Displaying values directly
+                },
+              },
+            },
+          },
+        }}
+      />
+      {/* <Typography variant="body1" align="center" marginTop={2}>
+        Sensor Timestamp: {sensorTimestamp}
+      </Typography> */}
     </Box>
   );
 };

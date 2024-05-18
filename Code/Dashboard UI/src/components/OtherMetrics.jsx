@@ -3,60 +3,41 @@ import axios from 'axios';
 import useSensorData from '../hooks/useSensorData';
 
 function OtherMetrics() {
-  // const [metrics, setMetrics] = useState({
-  //   CO2: 0,
-  //   Temperature: 0,
-  //   TVOC: 0,
-  //   flowerPetal: 'Closed'
-  // });
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [error, setError] = useState(null);
-
   const { sensorData, isLoading: sensorLoading, error: sensorError } = useSensorData();
+  const [timeDifference, setTimeDifference] = useState('');
 
-  // useEffect(() => {
-  //   const fetchMetrics = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       const response = await axios.get('http://localhost:8000/sensor_data');
-  //       console.log('Fetching sensor data from /sensor_data');
-  //       setMetrics({
-  //         CO2: response.data.CO2,
-  //         Temperature: response.data.Temperature,
-  //         TVOC: response.data.TVOC,
-  //         flowerPetal: response.data.flowerPetal ? 'Open' : 'Closed'
-  //       });
-  //       setIsLoading(false);
-  //       setError(null);
-  //     } catch (error) {
-  //       setError('Error: Failed to fetch metrics data');
-  //       setIsLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    if (sensorData.timestamp) {
+      const currentTime = Date.now();
+      const sensorTime = new Date(sensorData.timestamp).getTime();
+      const diffInMs = currentTime - sensorTime;
 
-  //   fetchMetrics();
-  //   const intervalId = setInterval(fetchMetrics, 3000); // fetch data every 10 seconds
-  //   return () => clearInterval(intervalId);
-  // }, []);
+      // // Convert the difference to a readable format (e.g., seconds, minutes)
+      // const diffInSeconds = Math.floor(diffInMs / 1000);
+      // const diffInMinutes = Math.floor(diffInSeconds / 60);
+      // const displayDiff = diffInMinutes > 0 ? `${diffInMinutes} min ago` : `${diffInSeconds} sec ago`;
+
+      setTimeDifference(`${diffInMs} ms`);
+    }
+  }, [sensorData.timestamp]);
 
   if (sensorLoading) {
     return <div>Loading metrics...</div>;
   }
 
   if (sensorError) {
-    return <div style={{ color: 'red' }}>{error}</div>;
+    return <div style={{ color: 'red' }}>{sensorError}</div>;
   }
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h3 className="text-lg font-semibold mb-4">Other metrics</h3>
 
-      {/* <h3 className="flex items-center mb-4 text-lg font-semibold">Other metrics</h3> */}
       <div className="space-y-2">
         <MetricRow label="CO2" value={sensorData.CO2} />
         <MetricRow label="Temperature" value={sensorData.Temperature} />
         <MetricRow label="TVOC" value={sensorData.TVOC} />
-        {/* <MetricRow label="Flower Petal" value={metrics.flowerPetal} /> */}
+        <MetricRow label="Lag" value={timeDifference} />
       </div>
     </div>
   );
@@ -64,7 +45,6 @@ function OtherMetrics() {
 
 function MetricRow({ label, value }) {
   return (
-    // Add styles to the div element
     <div className="flex justify-between">
       <span className="text-sm text-gray-600">{label}</span>
       <span className="text-sm font-bold">{value}</span>
