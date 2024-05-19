@@ -77,8 +77,9 @@ function FlowerController({ aqiValue }) {
 
   useEffect(() => {
     if (isConnected) {
-      const interval = setInterval(sendAqiValue, 3000); // Send AQI value every 3 seconds
-      return () => clearInterval(interval);
+      // const interval = setInterval(sendAqiValue, 3000); // Send AQI value every 3 seconds
+      // return () => clearInterval(interval);
+      sendAqiValue();
     }
   }, [isConnected, aqiValue]);
 

@@ -22,7 +22,7 @@ function DashboardLayout() {
   useEffect(() => {
     // Logic to calculate AQI value based on the CO2 and TVOC percentages
     const calculateAQI = (co2, tvoc) => {
-      return (co2 / 1000) * (co2Percentage / 100) + (tvoc / 200) * (tvocPercentage / 100);
+      return ((co2 - 400) / 1000) * (co2Percentage / 100) + (tvoc / 200) * (tvocPercentage / 100);
     };
 
     if (sensorData.CO2 && sensorData.TVOC) {
