@@ -1,11 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import { Box, Typography } from '@mui/material';
-import Chart from 'chart.js/auto';
-import useSensorData from '../hooks/useSensorData';
+import { Box } from '@mui/material';
 
-const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
-  const { sensorData, isLoading, error } = useSensorData();
+const AQIGraph = ({ sensorData, isLoading, error, aqiValue }) => {
   const [aqiData, setAqiData] = useState({
     labels: [],
     datasets: [
@@ -18,7 +15,7 @@ const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
         segment: {
           borderColor: (ctx) => {
             const value = ctx.p0.parsed.y;
-            return value > 2 ? 'red' : value > 1 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
+            return value > 4 ? 'red' : value > 2 ? 'orange' : value > 1 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
           },
         },
       },
@@ -26,21 +23,15 @@ const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
   });
   const [sensorTimestamp, setSensorTimestamp] = useState(0);
 
-  const calculateAQI = (co2, tvoc) => {
-    return (co2 / 2000) * (co2Percentage / 100) + (tvoc / 200) * (tvocPercentage / 100);
-  };
+  useEffect(() => {
+    if (sensorData.timestamp) {
+      setSensorTimestamp(new Date(sensorData.timestamp).toLocaleString('en-US'));
+    }
+  }, [sensorData.timestamp]);
 
   useEffect(() => {
-    const currentTime = Date.now();
-    const dataTimestamp = sensorData.timestamp;
-
-    if (dataTimestamp) {
-      setSensorTimestamp(new Date(dataTimestamp).toLocaleString('en-US')); // Convert to human-readable format
-    }
-
     if (!isLoading && !error && sensorData.CO2 && sensorData.TVOC) {
       const currentTimestamp = new Date().toLocaleTimeString('en-US'); // Get current time in HH:MM:SS format
-      const aqiValue = calculateAQI(sensorData.CO2, sensorData.TVOC);
 
       setAqiData((prevState) => {
         const newLabels = [...prevState.labels, currentTimestamp].slice(-50);
@@ -59,20 +50,17 @@ const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
     } else {
       console.log('Data is stale, not updating the plot');
     }
-  }, [sensorData, isLoading, error]);
+  }, [sensorData]);
 
   useEffect(() => {
     setAqiData((prevState) => {
       if (prevState.datasets[0].data.length === 0) {
         return prevState;
       }
-      const lastAQI = prevState.datasets[0].data[prevState.datasets[0].data.length - 1];
-      const lastLabel = prevState.labels[prevState.labels.length - 1];
-      const newAQI = calculateAQI(sensorData.CO2, sensorData.TVOC);
 
       const updatedData = prevState.datasets[0].data.map((value, index) => {
         if (index === prevState.datasets[0].data.length - 1) {
-          return newAQI;
+          return aqiValue;
         }
         return value;
       });
@@ -87,7 +75,7 @@ const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
         ],
       };
     });
-  }, [co2Percentage, tvocPercentage]);
+  }, [aqiValue]);
 
   if (isLoading) {
     return <div>Loading AQI data...</div>;
@@ -107,7 +95,7 @@ const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
           scales: {
             y: {
               min: 0,
-              max: 4,
+              max: 7,
               ticks: {
                 callback: function (value) {
                   return value; // Displaying values directly
@@ -117,9 +105,6 @@ const AQIGraph = ({ co2Percentage, tvocPercentage }) => {
           },
         }}
       />
-      <Typography variant="body1" align="center" marginTop={2}>
-        Sensor Timestamp: {sensorTimestamp}
-      </Typography>
     </Box>
   );
 };

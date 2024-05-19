@@ -4,8 +4,8 @@ import { Box, Typography } from '@mui/material';
 import Chart from 'chart.js/auto';
 import useSensorData from '../hooks/useSensorData';
 
-const AirQualityGraph = () => {
-  const { sensorData, isLoading, error } = useSensorData();
+const AirQualityGraph = ({ sensorData, isLoading, error }) => {
+  // const { sensorData, isLoading, error } = useSensorData();
   const [co2Data, setCo2Data] = useState({
     labels: [],
     datasets: [
@@ -18,7 +18,7 @@ const AirQualityGraph = () => {
         segment: {
           borderColor: (ctx) => {
             const value = ctx.p0.parsed.y;
-            return value > 4000 ? 'red' : value > 1000 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
+            return value > 4000 ? 'red' : value > 2000 ? 'orange' : value > 1000 ? 'yellow' : 'rgba(75, 192, 192, 0.2)';
           },
         },
       },
