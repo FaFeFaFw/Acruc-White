@@ -14,7 +14,6 @@ function FlowerController({ aqiValue }) {
       });
       const server = await device.gatt.connect();
       const service = await server.getPrimaryService(serviceUUID);
-      // Assuming the characteristic UUID is known and constant
       const characteristicUUID = 'abcdef12-3456-7890-abcd-ef1234567890';
       const characteristic = await service.getCharacteristic(characteristicUUID);
 
@@ -23,6 +22,8 @@ function FlowerController({ aqiValue }) {
       setIsConnected(true);
       setMessage('Connected to BLE device: ' + device.name);
       console.log('Connected to BLE device:', device.name);
+
+      device.addEventListener('gattserverdisconnected', handleDisconnect);
     } catch (error) {
       console.error('Failed to connect:', error);
       setIsConnected(false);
@@ -30,16 +31,28 @@ function FlowerController({ aqiValue }) {
     }
   };
 
-  const handleDisconnect = async () => {
+  const handleDisconnect = () => {
+    setIsConnected(false);
+    setMessage('Disconnected from BLE device');
+    console.log('Disconnected from BLE device');
+  };
+
+  const reconnect = async () => {
     if (device) {
       try {
-        await device.gatt.disconnect();
-        setIsConnected(false);
-        setMessage('Disconnected from BLE device');
-        console.log('Disconnected from BLE device:', device.name);
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(serviceUUID);
+        const characteristicUUID = 'abcdef12-3456-7890-abcd-ef1234567890';
+        const characteristic = await service.getCharacteristic(characteristicUUID);
+
+        setCharacteristic(characteristic);
+        setIsConnected(true);
+        setMessage('Reconnected to BLE device: ' + device.name);
+        console.log('Reconnected to BLE device:', device.name);
       } catch (error) {
-        console.error('Failed to disconnect:', error);
-        setMessage('Failed to disconnect');
+        console.error('Failed to reconnect:', error);
+        setIsConnected(false);
+        setMessage('Unable to reconnect');
       }
     }
   };
@@ -53,6 +66,11 @@ function FlowerController({ aqiValue }) {
         console.log('AQI value sent:', aqiValue);
       } catch (error) {
         console.error('Failed to send AQI value:', error);
+        if (device && !device.gatt.connected) {
+          setMessage('GATT Server is disconnected. Attempting to reconnect...');
+          console.log('GATT Server is disconnected. Attempting to reconnect...');
+          await reconnect();
+        }
       }
     }
   };
@@ -63,6 +81,20 @@ function FlowerController({ aqiValue }) {
       return () => clearInterval(interval);
     }
   }, [isConnected, aqiValue]);
+
+  const handleDisconnectButton = async () => {
+    if (device) {
+      try {
+        await device.gatt.disconnect();
+        setIsConnected(false);
+        setMessage('Disconnected from BLE device');
+        console.log('Disconnected from BLE device');
+      } catch (error) {
+        console.error('Failed to disconnect:', error);
+        setMessage('Failed to disconnect');
+      }
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
@@ -86,7 +118,7 @@ function FlowerController({ aqiValue }) {
           {isConnected ? 'Connected' : 'Connect'}
         </button>
         <button
-          onClick={handleDisconnect}
+          onClick={handleDisconnectButton}
           className="bg-red-500 text-white px-4 py-2 rounded mt-4 ml-4"
           disabled={!isConnected}
         >
