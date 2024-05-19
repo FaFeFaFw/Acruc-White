@@ -79,7 +79,7 @@ function DashboardLayout() {
               </div>
             </div>
             {/* Flower Control */}
-            <FlowerController />
+            <FlowerController aqiValue={aqiValue} />
           </div>
         </div>
 
